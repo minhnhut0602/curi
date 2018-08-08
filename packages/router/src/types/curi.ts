@@ -8,6 +8,7 @@ import { Response, Params } from "./response";
 export interface Navigation {
   action: Action;
   previous: Response | null;
+  finish?: () => void;
 }
 
 export interface Emitted {
@@ -34,6 +35,7 @@ export interface RouterOptions {
   emitRedirects?: boolean;
   automaticRedirects?: boolean;
   external?: any;
+  suspend?: boolean;
 }
 
 export interface CurrentResponse {
@@ -63,4 +65,5 @@ export interface CuriRouter {
   history: History;
   current(): CurrentResponse;
   navigate(options: NavigationDetails): CancelNavigateCallbacks;
+  finish?: () => void;
 }

@@ -41,7 +41,8 @@ export default function createRouter(
     sideEffects = [],
     emitRedirects = true,
     automaticRedirects = true,
-    external
+    external,
+    suspend = false
   } = options;
 
   let routes: CompiledRouteArray;
@@ -158,9 +159,42 @@ export default function createRouter(
       history,
       external
     );
-    pending.finish();
-    emitImmediate(response, navigation);
-    activeNavigation = undefined;
+
+    if (suspend) {
+      navigation.finish = createFinisher(pending, response, navigation);
+      emitSuspended(response, navigation);
+    } else {
+      pending.finish();
+      emitImmediate(response, navigation);
+      activeNavigation = undefined;
+    }    
+  }
+
+  function createFinisher(
+    pending: PendingNavigation,
+    response: Response,
+    navigation: Navigation
+  ) {
+    let called = false;
+    return function finisher() {
+      if (called || pending.cancelled) {
+        return;
+      }
+      called = true;
+
+      if (finishCallback) {
+        finishCallback();
+      }
+      resetCallbacks();
+
+      if (pending.finish) {
+        pending.finish();
+      }
+
+      activeNavigation = undefined;
+
+      callSideEffects({ response, navigation, router });
+    };
   }
 
   function resetCallbacks() {
@@ -168,16 +202,13 @@ export default function createRouter(
     finishCallback = undefined;
   }
 
-  function callObservers(emitted: Emitted) {
-    observers.forEach(fn => {
+  function callObserversAndOneTimers(emitted: Emitted) {
+    [...observers, ...oneTimers.splice(0)].forEach(fn => {
       fn(emitted);
     });
   }
 
-  function callOneTimersAndSideEffects(emitted: Emitted) {
-    oneTimers.splice(0).forEach(fn => {
-      fn(emitted);
-    });
+  function callSideEffects(emitted: Emitted) {
     sideEffects.forEach(fn => {
       fn(emitted);
     });
@@ -194,8 +225,8 @@ export default function createRouter(
       mostRecent.response = response;
       mostRecent.navigation = navigation;
 
-      callObservers({ response, navigation, router });
-      callOneTimersAndSideEffects({ response, navigation, router });
+      callObserversAndOneTimers({ response, navigation, router });
+      callSideEffects({ response, navigation, router });
     }
 
     if (response.redirectTo !== undefined && automaticRedirects) {
@@ -234,6 +265,20 @@ export default function createRouter(
     if (activeNavigation) {
       activeNavigation.cancel(action);
       activeNavigation.cancelled = true;
+    }
+  }
+
+  function emitSuspended(response: Response, navigation: Navigation) {
+    if (!response.redirectTo || emitRedirects) {
+      // store for current() and respond()
+      mostRecent.response = response;
+      mostRecent.navigation = navigation;
+
+      callObserversAndOneTimers({ response, navigation, router });
+    }
+
+    if (response.redirectTo !== undefined) {
+      history.navigate(response.redirectTo, "REPLACE");
     }
   }
 

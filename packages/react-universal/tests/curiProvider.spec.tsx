@@ -23,8 +23,6 @@ describe("curiProvider()", () => {
     ReactDOM.unmountComponentAtNode(node);
   });
 
-  describe("router argument", () => {});
-
   describe("children prop", () => {
     it("calls children() function when it renders", () => {
       const history = InMemory();
@@ -42,7 +40,6 @@ describe("curiProvider()", () => {
     it("re-renders when the location changes", done => {
       const history = InMemory();
       const router = curi(history, routes);
-      let pushedHistory = false;
       let firstCall = true;
       const fn = jest.fn(({ response }) => {
         if (firstCall) {
