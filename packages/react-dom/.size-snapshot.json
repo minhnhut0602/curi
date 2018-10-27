@@ -1,31 +1,31 @@
 {
   "dist/curi-react-dom.es.js": {
-    "bundled": 9621,
-    "minified": 4776,
-    "gzipped": 1932,
+    "bundled": 4441,
+    "minified": 2080,
+    "gzipped": 1021,
     "treeshaked": {
       "rollup": {
-        "code": 920,
-        "import_statements": 97
+        "code": 988,
+        "import_statements": 123
       },
       "webpack": {
-        "code": 2001
+        "code": 2915
       }
     }
   },
   "dist/curi-react-dom.js": {
-    "bundled": 9966,
-    "minified": 5056,
-    "gzipped": 2029
+    "bundled": 4791,
+    "minified": 2369,
+    "gzipped": 1124
   },
   "dist/curi-react-dom.umd.js": {
-    "bundled": 19481,
-    "minified": 8181,
-    "gzipped": 2749
+    "bundled": 12578,
+    "minified": 4968,
+    "gzipped": 2112
   },
   "dist/curi-react-dom.min.js": {
-    "bundled": 19441,
-    "minified": 8141,
-    "gzipped": 2731
+    "bundled": 12548,
+    "minified": 4938,
+    "gzipped": 2095
   }
 }
